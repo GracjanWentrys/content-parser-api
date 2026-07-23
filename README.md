@@ -94,7 +94,7 @@ dotnet --version
 
 1. **Sklonuj repozytorium**:
 ```bash
-git clone https://github.com/TWOJ_USERNAME/content-parser-api.git
+git clone https://github.com/GracjanWentrys/content-parser-api
 cd content-parser-api
 ```
 
