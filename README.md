@@ -1,14 +1,28 @@
+````md
 # Content Parser API
 
-Web API napisane w **.NET 10 / C#**, służące do dekodowania oraz generycznego parsowania danych przesyłanych przez API.
+REST API napisane w **.NET 10 / C#**, służące do dekodowania oraz parsowania danych przesyłanych przez API.
 
-Aplikacja przyjmuje dane zakodowane w formacie **Base64**, następnie dekoduje zawartość i przekazuje ją do odpowiedniego parsera w zależności od podanego typu danych.
+Aplikacja przyjmuje dane zakodowane w formacie **Base64**, następnie dekoduje ich zawartość i przekazuje ją do odpowiedniego parsera na podstawie typu danych wskazanego w żądaniu.
 
-Aktualnie obsługiwane formaty:
+Obecnie obsługiwane formaty:
+
 - `CSV`
 - `INTERNAL_JSON`
 
-Projekt został zaprojektowany tak, aby łatwo można było dodać kolejne formaty danych (np. XML) bez modyfikowania istniejącej logiki API.
+Architektura projektu została zaprojektowana w sposób umożliwiający łatwe rozszerzanie o kolejne formaty danych (np. `XML`) bez konieczności modyfikowania istniejącej logiki API.
+
+---
+
+## ✨ Funkcjonalności
+
+- Dekodowanie danych zakodowanych w formacie Base64
+- Parsowanie danych CSV
+- Parsowanie danych w formacie INTERNAL_JSON
+- Łatwe rozszerzanie o nowe parsery
+- Globalna obsługa błędów
+- Dokumentacja OpenAPI / Scalar
+- Architektura oparta o wzorce Strategy oraz Factory
 
 ---
 
@@ -29,61 +43,75 @@ Projekt został zaprojektowany tak, aby łatwo można było dodać kolejne forma
 Przepływ obsługi żądania:
 
 ```text
-HTTP Request
-     |
-     v
+Client
+   │
+   ▼
+POST /api/v1/parse-content
+   │
+   ▼
 Base64 Decoder
-     |
-     v
-Content Parser Factory
-     |
-     v
-CSV Parser / JSON Parser
-     |
-     v
-Parse Result
-     |
-     v
-HTTP Response
-```
+   │
+   ▼
+ContentParserFactory
+   │
+   ├────────► CsvContentParser
+   │
+   └────────► InternalJsonContentParser
+                 │
+                 ▼
+            Parse Result
+                 │
+                 ▼
+          HTTP Response
+````
 
-### Główne komponenty:
+### Główne komponenty
 
 #### `IContentDecoder`
+
 Odpowiada za dekodowanie danych wejściowych.
 
 Aktualna implementacja:
-- `Base64ContentDecoder`
+
+* `Base64ContentDecoder`
 
 ---
 
 #### `IContentParser`
-Interfejs dla wszystkich parserów danych.
 
-Każdy parser posiada:
-- obsługiwany typ danych,
-- własną logikę parsowania.
+Interfejs definiujący parser danych.
+
+Każda implementacja:
+
+* określa obsługiwany typ danych,
+* zawiera własną logikę parsowania.
 
 Aktualne implementacje:
-- `CsvContentParser`
-- `InternalJsonContentParser`
+
+* `CsvContentParser`
+* `InternalJsonContentParser`
 
 ---
 
 #### `ContentParserFactory`
-Odpowiada za wybór odpowiedniego parsera na podstawie typu danych przesłanego w request.
+
+Odpowiada za wybór odpowiedniego parsera na podstawie typu danych przesłanego w żądaniu.
 
 Dodanie nowego parsera wymaga jedynie:
+
 1. Utworzenia nowej klasy implementującej `IContentParser`.
-2. Zarejestrowania jej w Dependency Injection.
+2. Zarejestrowania jej w kontenerze Dependency Injection.
+
+Dzięki temu logika API pozostaje zamknięta na modyfikacje i otwarta na rozszerzenia (zasada Open/Closed).
 
 ---
 
 ## 🚀 Wymagania wstępne
 
-- [.NET 10 SDK](https://dotnet.microsoft.com/en-us/download/dotnet/10.0)
+* .NET 10 SDK
 
-Sprawdzenie wersji:
+Sprawdzenie zainstalowanej wersji:
+
 ```bash
 dotnet --version
 ```
@@ -92,76 +120,101 @@ dotnet --version
 
 ## 🛠️ Uruchomienie lokalne
 
-1. **Sklonuj repozytorium**:
+### 1. Sklonuj repozytorium
+
 ```bash
 git clone https://github.com/GracjanWentrys/content-parser-api.git
 cd content-parser-api
 ```
 
-2. **Przywróć zależności NuGet**:
+### 2. Przywróć zależności
+
 ```bash
 dotnet restore
 ```
 
-3. **Uruchom aplikację**:
+### 3. Uruchom aplikację
 
 Jeżeli znajdujesz się w katalogu głównym rozwiązania:
+
 ```bash
 dotnet run --project Api
 ```
 
-Jeżeli znajdujesz się bezpośrednio w katalogu projektu API:
+Jeżeli jesteś bezpośrednio w katalogu projektu API:
+
 ```bash
 dotnet run
 ```
 
-Po uruchomieniu aplikacja będzie dostępna pod adresem pokazanym w konsoli.
+Po uruchomieniu aplikacja będzie dostępna pod adresem wyświetlonym w konsoli.
 
 ---
 
-## 📚 Dokumentacja API (Scalar)
+## 📚 Dokumentacja API
 
-Po uruchomieniu aplikacji dokumentacja API dostępna jest pod adresem:
-* **Scalar UI**: `https://localhost:<port>/scalar/v1`
-* **OpenAPI Spec**: `https://localhost:<port>/openapi/v1.json`
+Po uruchomieniu aplikacji dostępna jest automatycznie wygenerowana dokumentacja API.
 
-*(Port może różnić się zależnie od konfiguracji środowiska).*
+* **Scalar UI:** `https://localhost:<port>/scalar/v1`
+* **OpenAPI:** `https://localhost:<port>/openapi/v1.json`
+
+> Port może różnić się w zależności od konfiguracji środowiska.
 
 ---
 
 ## 📌 Endpoint
 
-### `POST /api/v1/parse-content`
+| Metoda | Endpoint                |
+| ------ | ----------------------- |
+| POST   | `/api/v1/parse-content` |
 
-Parsuje zawartość zakodowaną w Base64.
+Parsuje dane zakodowane w Base64.
 
-#### **Headers**:
-`Content-Type: application/json`
+### Nagłówki
 
-#### **Body Request**:
+```http
+Content-Type: application/json
+```
 
-**Przykład dla CSV:**
+### Przykład żądania (CSV)
+
 ```json
 {
   "type": "CSV",
   "content": "TmFtZSxDaXR5LEFnZQpKb2huLCJOZXcgWW9yaywgVVNBIiwzMA=="
 }
 ```
-*(Po dekodowaniu Base64: `Name,City,Age
-John,"New York, USA",30`)*
 
-**Przykład dla JSON:**
+Po zdekodowaniu:
+
+```text
+Name,City,Age
+John,"New York, USA",30
+```
+
+### Przykład żądania (JSON)
+
 ```json
 {
   "type": "INTERNAL_JSON",
   "content": "W3sibmFtZSI6IkpvaG4iLCJhZ2UiOjMwfV0="
 }
 ```
-*(Po dekodowaniu Base64: `[{"name":"John","age":30}]`)*
+
+Po zdekodowaniu:
+
+```json
+[
+  {
+    "name": "John",
+    "age": 30
+  }
+]
+```
 
 ---
 
-### ✅ Przykładowa odpowiedź sukcesu (HTTP 200 OK)
+## ✅ Przykładowa odpowiedź (CSV)
 
 ```json
 {
@@ -178,13 +231,30 @@ John,"New York, USA",30`)*
 }
 ```
 
+### Przykładowa odpowiedź (JSON)
+
+```json
+{
+  "isSuccess": true,
+  "recordCount": 1,
+  "data": [
+    {
+      "name": "John",
+      "age": 30
+    }
+  ],
+  "errorMessage": null
+}
+```
+
 ---
 
-### ❌ Obsługa błędów
+## ❌ Obsługa błędów
 
 API rozróżnia błędy klienta oraz błędy serwera.
 
-#### **1. Niepoprawny Base64 (HTTP 400 Bad Request)**
+### Niepoprawny Base64 (400 Bad Request)
+
 ```json
 {
   "isSuccess": false,
@@ -194,7 +264,8 @@ API rozróżnia błędy klienta oraz błędy serwera.
 }
 ```
 
-#### **2. Nieobsługiwany typ danych (HTTP 400 Bad Request)**
+### Nieobsługiwany typ danych (400 Bad Request)
+
 ```json
 {
   "isSuccess": false,
@@ -204,7 +275,8 @@ API rozróżnia błędy klienta oraz błędy serwera.
 }
 ```
 
-#### **3. Błąd parsowania danych (HTTP 422 Unprocessable Entity)**
+### Błąd parsowania danych (422 Unprocessable Entity)
+
 ```json
 {
   "isSuccess": false,
@@ -214,7 +286,8 @@ API rozróżnia błędy klienta oraz błędy serwera.
 }
 ```
 
-#### **4. Nieoczekiwany błąd aplikacji (HTTP 500 Internal Server Error)**
+### Nieoczekiwany błąd aplikacji (500 Internal Server Error)
+
 ```json
 {
   "isSuccess": false,
@@ -224,15 +297,16 @@ API rozróżnia błędy klienta oraz błędy serwera.
 }
 ```
 
-Szczegóły błędu są zapisywane w logach aplikacji, ale nie są zwracane bezpośrednio klientowi ze względów bezpieczeństwa.
+Szczegółowe informacje o błędzie są zapisywane w logach aplikacji, natomiast klient otrzymuje jedynie bezpieczny komunikat.
 
 ---
 
 ## 🔧 Dodanie nowego parsera
 
-Przykład: dodanie obsługi `XML`.
+Przykład dodania obsługi formatu `XML`.
 
-1. **Utwórz nową implementację:**
+### 1. Utwórz implementację parsera
+
 ```csharp
 public class XmlContentParser : IContentParser
 {
@@ -245,7 +319,8 @@ public class XmlContentParser : IContentParser
 }
 ```
 
-2. **Dodaj nowy typ w enum:**
+### 2. Dodaj nowy typ danych
+
 ```csharp
 public enum ContentType
 {
@@ -255,24 +330,30 @@ public enum ContentType
 }
 ```
 
-3. **Zarejestruj parser w Dependency Injection:**
+### 3. Zarejestruj parser
+
 ```csharp
 builder.Services.AddSingleton<IContentParser, XmlContentParser>();
 ```
 
-API automatycznie zacznie obsługiwać nowy format dzięki wzorcowi Factory!
+Od tego momentu `ContentParserFactory` będzie automatycznie wykorzystywała nowy parser bez konieczności modyfikowania istniejącej logiki.
 
 ---
 
 ## 📝 Decyzje projektowe
 
-* **Wzorzec Strategy & Factory**: Parsery zostały oddzielone od logiki API, co zapewnia wysoki poziom rozszerzalności (zgodność z zasadą Open/Closed z SOLID).
-* **Globalna obsługa błędów**: Centralny middleware przechwytuje wyjątki i spójnie formatuje odpowiedzi błędów.
-* **Własny / Lekki Parser CSV**: Zapewnia poprawną obsługę wartości w cudzysłowach, przecinków wewnątrz pól oraz znaków nowej linii bez konieczności ciągnięcia dużych i przestarzałych zależności zewnętrznych.
-* **Czysty układ Minimal API**: Logika endpointu pozostaje zwięzła i skupia się wyłącznie na orkiestracji procesu.
+* **Strategy Pattern** – każdy parser odpowiada wyłącznie za obsługę jednego formatu danych.
+* **Factory Pattern** – wybór parsera odbywa się dynamicznie na podstawie typu danych przesłanego w żądaniu.
+* **Dependency Injection** – wszystkie komponenty są zarządzane przez kontener DI, co upraszcza testowanie i rozbudowę aplikacji.
+* **Globalna obsługa błędów** – dedykowany middleware zapewnia spójny format odpowiedzi błędów.
+* **Własny parser CSV** – poprawnie obsługuje wartości w cudzysłowach, przecinki wewnątrz pól oraz znaki nowej linii bez konieczności korzystania z ciężkich zewnętrznych bibliotek.
+* **Minimal API** – endpoint odpowiada wyłącznie za orkiestrację procesu, natomiast logika biznesowa została wydzielona do osobnych komponentów.
 
 ---
 
-## 📄 Licencja
+## 📄 O projekcie
 
-Projekt został przygotowany jako zadanie rekrutacyjne / przykład implementacji generycznego parsera danych dla API w technologii .NET 10.
+Projekt został przygotowany jako zadanie rekrutacyjne prezentujące implementację rozszerzalnego parsera danych w technologii .NET 10 z wykorzystaniem wzorców projektowych Factory i Strategy oraz architektury opartej na Dependency Injection.
+
+```
+```
