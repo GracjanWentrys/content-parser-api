@@ -20,7 +20,7 @@ Projekt został zaprojektowany tak, aby łatwo można było dodać kolejne forma
 - Dependency Injection
 - Factory Pattern
 - Strategy Pattern
-- OpenAPI / Scalar (lub Swagger UI)
+- OpenAPI / Scalar
 
 ---
 
@@ -119,7 +119,7 @@ Po uruchomieniu aplikacja będzie dostępna pod adresem pokazanym w konsoli.
 
 ---
 
-## 📚 Dokumentacja API (Scalar / Swagger)
+## 📚 Dokumentacja API (Scalar)
 
 Po uruchomieniu aplikacji dokumentacja API dostępna jest pod adresem:
 * **Scalar UI**: `https://localhost:<port>/scalar/v1`
