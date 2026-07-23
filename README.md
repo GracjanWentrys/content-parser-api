@@ -1,6 +1,6 @@
 # Content Parser API
 
-Web API napisane w **.NET 8 / C#**, służące do dekodowania oraz generycznego parsowania danych przesyłanych przez API.
+Web API napisane w **.NET 10 / C#**, służące do dekodowania oraz generycznego parsowania danych przesyłanych przez API.
 
 Aplikacja przyjmuje dane zakodowane w formacie **Base64**, następnie dekoduje zawartość i przekazuje ją do odpowiedniego parsera w zależności od podanego typu danych.
 
@@ -14,7 +14,7 @@ Projekt został zaprojektowany tak, aby łatwo można było dodać kolejne forma
 
 ## 🚀 Technologie
 
-- .NET 8
+- .NET 10
 - ASP.NET Core Minimal API
 - C#
 - Dependency Injection
@@ -81,7 +81,7 @@ Dodanie nowego parsera wymaga jedynie:
 
 ## 🚀 Wymagania wstępne
 
-- [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0)
+- [.NET 10 SDK](https://dotnet.microsoft.com/en-us/download/dotnet/10.0)
 
 Sprawdzenie wersji:
 ```bash
@@ -275,4 +275,4 @@ API automatycznie zacznie obsługiwać nowy format dzięki wzorcowi Factory!
 
 ## 📄 Licencja
 
-Projekt został przygotowany jako zadanie rekrutacyjne / przykład implementacji generycznego parsera danych dla API w technologii .NET 8.
+Projekt został przygotowany jako zadanie rekrutacyjne / przykład implementacji generycznego parsera danych dla API w technologii .NET 10.
