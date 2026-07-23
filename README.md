@@ -1,4 +1,3 @@
-````md
 # Content Parser API
 
 REST API napisane w **.NET 10 / C#**, służące do dekodowania oraz parsowania danych przesyłanych przez API.
@@ -356,4 +355,4 @@ Od tego momentu `ContentParserFactory` będzie automatycznie wykorzystywała now
 Projekt został przygotowany jako zadanie rekrutacyjne prezentujące implementację rozszerzalnego parsera danych w technologii .NET 10 z wykorzystaniem wzorców projektowych Factory i Strategy oraz architektury opartej na Dependency Injection.
 
 ```
-```
+
